@@ -21,6 +21,41 @@
  
  */
 
+ var express = require('express');
+var request = require('request');
+
+var app = express();
+
+var GA_TRACKING_ID = 'UA-YOUR-CODE-HERE';
+
+function trackEvent(category, action, label, value, callbback) {
+  var data = {
+    v: '1', // API Version.
+    tid: GA_TRACKING_ID, // Tracking ID / Property ID.
+    // Anonymous Client Identifier. Ideally, this should be a UUID that
+    // is associated with particular user, device, or browser instance.
+    cid: '555',
+    t: 'event', // Event hit type.
+    ec: category, // Event category.
+    ea: action, // Event action.
+    el: label, // Event label.
+    ev: value, // Event value.
+  };
+
+  request.post(
+    'http://www.google-analytics.com/collect', {
+      form: data
+    },
+    function(err, response) {
+      if (err) { return callbback(err); }
+      if (response.statusCode !== 200) {
+        return callbback(new Error('Tracking failed'));
+      }
+      callbback();
+    }
+  );
+}
+
 'use strict';
 
 var AlexaSkill = require("./AlexaSkill");
@@ -53,6 +88,20 @@ PrayerHelper.prototype.eventHandlers.onLaunch = function (launchRequest, session
 
 PrayerHelper.prototype.intentHandlers = {
     "PrayerIntent": function (intent, session, response) {
+
+        /// GOOGLE ANALYTICS START ///
+
+        trackEvent(
+        'Intent',
+        'Prayer Intent',
+        'na',
+        '100', // Event value must be numeric.
+        function(err) {
+            if (err) {
+                return next(err);
+            }
+
+        /// GOOGLE ANALYTICS END ///
         var itemSlot = intent.slots.Item,
             itemName;
         if (itemSlot && itemSlot.value){
@@ -90,16 +139,62 @@ PrayerHelper.prototype.intentHandlers = {
     },
 
     "AMAZON.StopIntent": function (intent, session, response) {
+
+        /// GOOGLE ANALYTICS START ///
+
+        trackEvent(
+        'Intent',
+        'Stop Intent',
+        'na',
+        '100', // Event value must be numeric.
+        function(err) {
+            if (err) {
+                return next(err);
+            }
+
+        /// GOOGLE ANALYTICS END ///
+
         var speechOutput = "Goodbye";
         response.tell(speechOutput);
     },
 
     "AMAZON.CancelIntent": function (intent, session, response) {
+        
+        /// GOOGLE ANALYTICS START ///
+
+        trackEvent(
+        'Intent',
+        'Cancel Intent',
+        'na',
+        '100', // Event value must be numeric.
+        function(err) {
+            if (err) {
+                return next(err);
+            }
+
+        /// GOOGLE ANALYTICS END ///
+
         var speechOutput = "Goodbye";
         response.tell(speechOutput);
     },
 
     "AMAZON.HelpIntent": function (intent, session, response) {
+
+        /// GOOGLE ANALYTICS START ///
+
+        trackEvent(
+        'Intent',
+        'Help Intent',
+        'na',
+        '100', // Event value must be numeric.
+        function(err) {
+            if (err) {
+                return next(err);
+            }
+
+        /// GOOGLE ANALYTICS END ///
+
+
         var speechText = "Say the name of the prayer you would like me to say. You can ask me to say a prayer like Our Father or Hail Mary... Now, which prayer would you like me to say?";
         var repromptText = "You can say things like, pray our father or pray a hail mary, ... Now, which prayer would you like me to say?";
         var speechOutput = {
